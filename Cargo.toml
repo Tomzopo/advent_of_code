@@ -1,0 +1,11 @@
+[workspace]
+resolver = "2"
+
+members = [
+    "2022/*",
+    "2023/*",
+]
+
+[workspace.lints.rust]
+
+[workspace.lints.clippy]
