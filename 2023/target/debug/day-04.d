@@ -1,1 +1,0 @@
-C:\Users\thoma\dev\advent_of_code\2023\target\debug\day-04.exe: C:\Users\thoma\dev\advent_of_code\2023\day-04\input\input1.txt C:\Users\thoma\dev\advent_of_code\2023\day-04\input\input2.txt C:\Users\thoma\dev\advent_of_code\2023\day-04\src\main.rs C:\Users\thoma\dev\advent_of_code\2023\day-04\src\part1.rs C:\Users\thoma\dev\advent_of_code\2023\day-04\src\part2.rs
