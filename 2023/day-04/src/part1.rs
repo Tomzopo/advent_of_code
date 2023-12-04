@@ -1,5 +1,3 @@
-use itertools::Itertools;
-
 pub fn part_one(input: &str) -> u32 {
     input
         .lines()
@@ -25,13 +23,7 @@ pub fn get_card_numbers(input: &str) -> Vec<u32> {
 }
 
 pub fn get_matching_cards(input: &str) -> Vec<u32> {
-    let (player_card, score_card) = input
-        .split_once(": ")
-        .unwrap()
-        .1
-        .splitn(2, "| ")
-        .collect_tuple()
-        .unwrap();
+    let (player_card, score_card) = input.split_once(": ").unwrap().1.split_once("| ").unwrap();
 
     let player_numbers = get_card_numbers(player_card);
     let score_numbers = get_card_numbers(score_card);
