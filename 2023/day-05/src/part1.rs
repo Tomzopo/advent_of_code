@@ -13,7 +13,7 @@ struct Map {
 
 impl AlmanacMap for Map {
     fn get_mapping(&self, input: i64) -> Option<i64> {
-        if self.source_start <= input && input < self.source_start + self.range {
+        if (self.source_start..self.source_start + self.range).contains(&input) {
             Some(input - self.source_start + self.destination_start)
         } else {
             None

@@ -1,3 +1,3 @@
-pub fn part_two(input: &str) -> i64 {
+pub fn part_two(_: &str) -> i64 {
     0
 }
