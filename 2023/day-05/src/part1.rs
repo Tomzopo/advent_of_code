@@ -1,6 +1,6 @@
 use itertools::Itertools;
 
-trait GardenMapping {
+trait AlmanacMap {
     fn get_mapping(&self, input: i64) -> Option<i64>;
 }
 
@@ -11,7 +11,7 @@ struct Map {
     range: i64,
 }
 
-impl GardenMapping for Map {
+impl AlmanacMap for Map {
     fn get_mapping(&self, input: i64) -> Option<i64> {
         if self.source_start <= input && input < self.source_start + self.range {
             Some(input - self.source_start + self.destination_start)
@@ -22,11 +22,11 @@ impl GardenMapping for Map {
 }
 
 #[derive(Debug)]
-struct BlockMap {
+struct CategoryMap {
     maps: Vec<Map>,
 }
 
-impl GardenMapping for BlockMap {
+impl AlmanacMap for CategoryMap {
     fn get_mapping(&self, input: i64) -> Option<i64> {
         self.maps.iter().find_map(|map| map.get_mapping(input))
     }
@@ -34,10 +34,10 @@ impl GardenMapping for BlockMap {
 
 #[derive(Debug)]
 struct GardenMap {
-    block_maps: Vec<BlockMap>,
+    block_maps: Vec<CategoryMap>,
 }
 
-impl GardenMapping for GardenMap {
+impl AlmanacMap for GardenMap {
     fn get_mapping(&self, input: i64) -> Option<i64> {
         let mut path: Option<i64> = Some(input);
         self.block_maps.iter().for_each(|block_map| {
@@ -73,7 +73,7 @@ fn parse_seeds(input: Option<&str>) -> Vec<i64> {
 }
 
 fn parse_garden(input: core::str::Split<&str>) -> GardenMap {
-    let block_maps: Vec<BlockMap> = input
+    let block_maps: Vec<CategoryMap> = input
         .map(|block| {
             let maps = block
                 .lines()
@@ -93,7 +93,7 @@ fn parse_garden(input: core::str::Split<&str>) -> GardenMap {
                 })
                 .collect::<Vec<Map>>();
 
-            BlockMap { maps }
+            CategoryMap { maps }
         })
         .collect();
 
@@ -150,7 +150,7 @@ humidity-to-location map:
             },
             TestCase {
                 input: include_str!("../input/input1.txt"),
-                expected: 0278755257,
+                expected: 278755257,
             },
         ];
 
