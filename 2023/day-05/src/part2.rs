@@ -54,7 +54,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn part_one_test() {
+    fn part_two_test() {
         struct TestCase {
             input: &'static str,
             expected: i64,
@@ -97,10 +97,10 @@ humidity-to-location map:
 56 93 4"#,
                 expected: 46,
             },
-            // TestCase {
-            //     input: include_str!("../input/input1.txt"),
-            //     expected: 278755257,
-            // },
+            TestCase {
+                input: include_str!("../input/input2.txt"),
+                expected: 26829166,
+            },
         ];
 
         for test_case in test_cases {
