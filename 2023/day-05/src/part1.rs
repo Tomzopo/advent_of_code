@@ -1,11 +1,11 @@
 use itertools::Itertools;
 
-trait AlmanacMap {
+pub trait AlmanacMap {
     fn get_mapping(&self, input: i64) -> Option<i64>;
 }
 
 #[derive(Debug)]
-struct Map {
+pub struct Map {
     destination_start: i64,
     source_start: i64,
     range: i64,
@@ -22,7 +22,7 @@ impl AlmanacMap for Map {
 }
 
 #[derive(Debug)]
-struct CategoryMap {
+pub struct CategoryMap {
     maps: Vec<Map>,
 }
 
@@ -33,7 +33,7 @@ impl AlmanacMap for CategoryMap {
 }
 
 #[derive(Debug)]
-struct GardenMap {
+pub struct GardenMap {
     block_maps: Vec<CategoryMap>,
 }
 
@@ -72,7 +72,7 @@ fn parse_seeds(input: Option<&str>) -> Vec<i64> {
         .collect()
 }
 
-fn parse_garden(input: core::str::Split<&str>) -> GardenMap {
+pub fn parse_garden(input: core::str::Split<&str>) -> GardenMap {
     let block_maps: Vec<CategoryMap> = input
         .map(|block| {
             let maps = block
