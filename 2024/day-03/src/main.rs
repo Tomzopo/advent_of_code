@@ -37,25 +37,25 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_part_one() {
+    fn test_part_one_example() {
         let input = "xmul(2,4)%&mul[3,7]!@^do_not_mul(5,5)+mul(32,64]then(mul(11,8)mul(8,5))";
         assert_eq!(part_one(input), 161)
     }
 
     #[test]
-    fn test_part_one_res() {
+    fn test_part_one() {
         let input = include_str!("../input/input.txt");
         assert_eq!(part_one(input), 175015740)
     }
 
     #[test]
-    fn test_part_two() {
+    fn test_part_two_example() {
         let input = "xmul(2,4)&mul[3,7]!^don't()_mul(5,5)+mul(32,64](mul(11,8)undo()?mul(8,5))";
         assert_eq!(part_two(input), 48)
     }
 
     #[test]
-    fn test_part_two_res() {
+    fn test_part_two() {
         let input = include_str!("../input/input.txt");
         assert_eq!(part_two(input), 112272912);
     }
