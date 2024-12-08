@@ -1,1 +1,0 @@
-core::iter::adapters::map::Map<core::str::iter::SplitWhitespace<'_>, {closure@day-01\src\main.rs:36:18: 36:23}>
