@@ -13,10 +13,13 @@ fn parse_input(input: &str) -> (HashMap<i64, HashSet<i64>>, Vec<Vec<i64>>) {
         .lines()
         .map(|line| line.split_once('|').unwrap())
         .map(|(a, b)| (a.parse().unwrap(), b.parse().unwrap()))
-        .fold(HashMap::new(), |mut map, (a, b)| {
-            map.entry(b).or_insert_with(HashSet::new).insert(a);
-            map
-        });
+        .fold(
+            HashMap::new(),
+            |mut map: HashMap<i64, HashSet<i64>>, (a, b)| {
+                map.entry(b).or_default().insert(a);
+                map
+            },
+        );
 
     let queue = queue_input
         .lines()
