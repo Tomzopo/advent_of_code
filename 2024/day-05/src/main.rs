@@ -41,7 +41,7 @@ fn is_sorted(ordering_map: &HashMap<i64, HashSet<i64>>, pq: &[i64]) -> bool {
     })
 }
 
-fn sort_queue(ordering_map: &HashMap<i64, HashSet<i64>>, pq: &mut Vec<i64>) {
+fn sort_queue(ordering_map: &HashMap<i64, HashSet<i64>>, pq: &mut [i64]) {
     pq.sort_by(|a, b| match ordering_map.get(b) {
         Some(set) => set.contains(a).cmp(&true),
         None => std::cmp::Ordering::Less,
