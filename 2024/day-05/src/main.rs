@@ -9,27 +9,40 @@ fn main() {
 fn parse_input(input: &str) -> (HashMap<i64, HashSet<i64>>, Vec<Vec<i64>>) {
     let (ordering_input, queue_input) = input.split_once("\n\n").unwrap();
 
-    let ordering = ordering_input
+    let ordering_map = ordering_input
         .lines()
         .map(|line| line.split_once('|').unwrap())
-        .map(|(a, b)| (a.parse::<i64>().unwrap(), b.parse::<i64>().unwrap()))
-        .collect::<Vec<(i64, i64)>>();
-
-    let mut ordering_map = HashMap::new();
-    for (a, b) in ordering {
-        ordering_map.entry(b).or_insert_with(HashSet::new).insert(a);
-    }
+        .map(|(a, b)| (a.parse().unwrap(), b.parse().unwrap()))
+        .fold(HashMap::new(), |mut map, (a, b)| {
+            map.entry(b).or_insert_with(HashSet::new).insert(a);
+            map
+        });
 
     let queue = queue_input
         .lines()
         .map(|line| {
             line.split(',')
-                .map(|s| s.parse::<i64>().unwrap())
+                .map(|s| s.parse().unwrap())
                 .collect::<Vec<_>>()
         })
-        .collect::<Vec<_>>();
+        .collect();
 
     (ordering_map, queue)
+}
+
+fn is_sorted(ordering_map: &HashMap<i64, HashSet<i64>>, pq: &[i64]) -> bool {
+    pq.windows(2).all(|w| {
+        ordering_map
+            .get(&w[1])
+            .map_or(false, |set| set.contains(&w[0]))
+    })
+}
+
+fn sort_queue(ordering_map: &HashMap<i64, HashSet<i64>>, pq: &mut Vec<i64>) {
+    pq.sort_by(|a, b| match ordering_map.get(b) {
+        Some(set) => set.contains(a).cmp(&true),
+        None => std::cmp::Ordering::Less,
+    });
 }
 
 fn part_one(input: &str) -> i64 {
@@ -38,12 +51,7 @@ fn part_one(input: &str) -> i64 {
     queue
         .iter()
         .filter_map(|pq| {
-            if pq.windows(2).all(
-                |w| match (ordering_map.get(&w[1]), ordering_map.get(&w[0])) {
-                    (Some(set), _) => set.contains(&w[0]),
-                    _ => false,
-                },
-            ) {
+            if is_sorted(&ordering_map, pq) {
                 Some(pq[pq.len() / 2])
             } else {
                 None
@@ -58,16 +66,8 @@ fn part_two(input: &str) -> i64 {
     queue
         .iter_mut()
         .filter_map(|pq| {
-            if pq.windows(2).any(
-                |w| match (ordering_map.get(&w[1]), ordering_map.get(&w[0])) {
-                    (Some(set), _) => !set.contains(&w[0]),
-                    _ => true,
-                },
-            ) {
-                pq.sort_by(|a, b| match ordering_map.get(b) {
-                    Some(set) => set.contains(a).cmp(&true),
-                    None => std::cmp::Ordering::Less,
-                });
+            if !is_sorted(&ordering_map, pq) {
+                sort_queue(&ordering_map, pq);
                 Some(pq[pq.len() / 2])
             } else {
                 None
