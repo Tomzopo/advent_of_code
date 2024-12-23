@@ -41,6 +41,8 @@ fn solve_equations(input: &str, solving_func: fn(&Equation) -> bool) -> i64 {
         .sum()
 }
 
+// Could change this to be the same as part_two, just using reduced OPERATIONS, but thought I'd just
+// keep this solution I did first here
 fn is_equation_solvable(eq: &Equation) -> bool {
     let nums = &eq.nums;
     let n = nums.len();
