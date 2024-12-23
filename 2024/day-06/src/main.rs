@@ -160,12 +160,9 @@ fn part_two(input: &str) -> i64 {
                 }
                 if visited_set.contains(&new_position) {
                     break true;
-                } else if in_bounds(new_position.x, new_position.y, row_size, col_size) {
-                    position = new_position;
-                    visited_set.insert(position);
-                } else {
-                    break false;
                 }
+                position = new_position;
+                visited_set.insert(position);
             }
         })
         .collect();
