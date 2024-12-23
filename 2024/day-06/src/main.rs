@@ -14,7 +14,7 @@ enum Tile {
     Start,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Eq, PartialEq, Copy, Clone, Hash)]
 struct Position {
     x: i64,
     y: i64,
@@ -48,7 +48,7 @@ impl Position {
     }
 }
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 enum Direction {
     Up,
     Down,
@@ -56,8 +56,14 @@ enum Direction {
     Right,
 }
 
-fn part_one(input: &str) -> i64 {
-    let grid: Vec<Vec<_>> = input
+impl Default for Direction {
+    fn default() -> Self {
+        Self::Up
+    }
+}
+
+fn parse_grid(input: &str) -> Vec<Vec<Option<Tile>>> {
+    input
         .lines()
         .map(|line| {
             line.chars()
@@ -68,18 +74,21 @@ fn part_one(input: &str) -> i64 {
                 })
                 .collect()
         })
-        .collect();
+        .collect()
+}
 
-    let (start_x, start_y) = grid
-        .iter()
-        .enumerate()
-        .find_map(|(y, row)| {
-            row.iter().enumerate().find_map(|(x, tile)| match tile {
-                Some(Tile::Start) => Some((x as i64, y as i64)),
-                _ => None,
-            })
+fn get_starting_position(grid: &[Vec<Option<Tile>>]) -> Option<(i64, i64)> {
+    grid.iter().enumerate().find_map(|(y, row)| {
+        row.iter().enumerate().find_map(|(x, tile)| match tile {
+            Some(Tile::Start) => Some((x as i64, y as i64)),
+            _ => None,
         })
-        .unwrap();
+    })
+}
+
+fn part_one(input: &str) -> i64 {
+    let grid = parse_grid(input);
+    let (start_x, start_y) = get_starting_position(&grid).unwrap();
 
     let mut position = Position {
         x: start_x,
@@ -88,14 +97,13 @@ fn part_one(input: &str) -> i64 {
     };
 
     let (row_size, col_size) = (grid.len(), grid[0].len());
-    let mut exit = false;
     let mut visited_set = HashSet::new();
     visited_set.insert((position.x, position.y));
 
-    while !exit {
+    loop {
         let new_position = position.patrol();
         if !in_bounds(new_position.x, new_position.y, row_size, col_size) {
-            exit = true;
+            break;
         } else if grid[new_position.y as usize][new_position.x as usize] == Some(Obstacle) {
             position.rotate();
         } else {
@@ -107,12 +115,66 @@ fn part_one(input: &str) -> i64 {
     visited_set.len() as i64
 }
 
-fn in_bounds(x: i64, y: i64, rows: usize, cols: usize) -> bool {
-    x >= 0 && x < cols as i64 && y >= 0 && y < rows as i64
+fn part_two(input: &str) -> i64 {
+    let grid = parse_grid(input);
+    let (start_x, start_y) = get_starting_position(&grid).unwrap();
+    let starting_position = Position {
+        x: start_x,
+        y: start_y,
+        direction: Direction::Up,
+    };
+    let mut position = starting_position;
+
+    let (row_size, col_size) = (grid.len(), grid[0].len());
+    let mut visited_set = HashSet::new();
+
+    loop {
+        let new_position = position.patrol();
+        if !in_bounds(new_position.x, new_position.y, row_size, col_size) {
+            break;
+        } else if grid[new_position.y as usize][new_position.x as usize] == Some(Obstacle) {
+            position.rotate();
+        } else {
+            position = new_position;
+            visited_set.insert((position.x, position.y));
+        }
+    }
+
+    // I am not proud of this :(
+    let res: Vec<_> = visited_set
+        .iter()
+        .filter(|new_wall| {
+            let mut position = starting_position;
+            let mut visited_set = HashSet::<Position>::new();
+            visited_set.insert(position);
+
+            loop {
+                let new_position = position.patrol();
+                if !in_bounds(new_position.x, new_position.y, row_size, col_size) {
+                    break false;
+                } else if grid[new_position.y as usize][new_position.x as usize] == Some(Obstacle)
+                    || (new_position.x == new_wall.0 && new_position.y == new_wall.1)
+                {
+                    position.rotate();
+                    continue;
+                }
+                if visited_set.contains(&new_position) {
+                    break true;
+                } else if in_bounds(new_position.x, new_position.y, row_size, col_size) {
+                    position = new_position;
+                    visited_set.insert(position);
+                } else {
+                    break false;
+                }
+            }
+        })
+        .collect();
+
+    res.len() as i64
 }
 
-fn part_two(input: &str) -> i64 {
-    todo!()
+fn in_bounds(x: i64, y: i64, rows: usize, cols: usize) -> bool {
+    x >= 0 && x < cols as i64 && y >= 0 && y < rows as i64
 }
 
 #[cfg(test)]
@@ -152,12 +214,12 @@ mod tests {
 ........#.
 #.........
 ......#..."#;
-        assert_eq!(part_two(input), 0);
+        assert_eq!(part_two(input), 6);
     }
 
     #[test]
     fn test_part_two() {
         let input = include_str!("../input/input.txt");
-        assert_eq!(part_two(input), 0);
+        assert_eq!(part_two(input), 1939);
     }
 }
