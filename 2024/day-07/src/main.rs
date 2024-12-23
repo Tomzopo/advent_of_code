@@ -67,8 +67,8 @@ fn is_equation_solvable_part2(eq: &Equation) -> bool {
     (0..operation_count)
         .map(|_| OPERATIONS)
         .multi_cartesian_product()
-        .any(|seq| {
-            let mut ops = seq.iter();
+        .any(|operation_seq| {
+            let mut ops = operation_seq.iter();
             let result = nums
                 .iter()
                 .copied()
