@@ -1,0 +1,11 @@
+[package]
+name = "day-07"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+log = "0.4.22"
+itertools = "0.13.0"
+
+[lints]
+workspace = true
