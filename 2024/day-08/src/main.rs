@@ -14,7 +14,7 @@ struct Antenna {
 }
 
 #[derive(Debug, PartialEq, Eq, Hash)]
-struct Antinode {
+struct AntiNode {
     x: i64,
     y: i64,
 }
@@ -25,39 +25,78 @@ struct AntennaGrid {
     antennas: Vec<Antenna>,
 }
 
-impl Antinode {
-    fn in_map(self, max_x: i64, max_y: i64) -> Option<Antinode> {
-        if self.x >= 0 && self.x < max_x && self.y >= 0 && self.y < max_y {
-            Some(self)
-        } else {
-            None
-        }
+impl AntiNode {
+    fn in_map(&self, max_x: i64, max_y: i64) -> bool {
+        self.x >= 0 && self.x < max_x && self.y >= 0 && self.y < max_y
     }
 }
 
 impl Antenna {
-    fn get_antinodes(
+    fn get_anti_nodes(
         &self,
         other: &Self,
         max_x: i64,
         max_y: i64,
-    ) -> (Option<Antinode>, Option<Antinode>) {
+    ) -> (Option<AntiNode>, Option<AntiNode>) {
         let (dx, dy) = (self.x - other.x, self.y - other.y);
 
-        let antinode_one = Antinode {
+        let anti_node_one = AntiNode {
             x: self.x + dx,
             y: self.y + dy,
         };
 
-        let antinode_two = Antinode {
+        let anti_node_two = AntiNode {
             x: other.x - dx,
             y: other.y - dy,
         };
 
-        (
-            antinode_one.in_map(max_x, max_y),
-            antinode_two.in_map(max_x, max_y),
-        )
+        let anti_node_one = if anti_node_one.in_map(max_x, max_y) {
+            Some(anti_node_one)
+        } else {
+            None
+        };
+
+        let anti_node_two = if anti_node_two.in_map(max_x, max_y) {
+            Some(anti_node_two)
+        } else {
+            None
+        };
+
+        (anti_node_one, anti_node_two)
+    }
+
+    fn get_anti_nodes_continuous(&self, other: &Self, max_x: i64, max_y: i64) -> Vec<AntiNode> {
+        let (dx, dy) = (self.x - other.x, self.y - other.y);
+        let mut res: Vec<AntiNode> = Vec::new();
+        let (mut new_dx, mut new_dy) = (0, 0);
+
+        loop {
+            let anti_node_one = AntiNode {
+                x: self.x + new_dx,
+                y: self.y + new_dy,
+            };
+
+            let anti_node_two = AntiNode {
+                x: other.x - new_dx,
+                y: other.y - new_dy,
+            };
+
+            if !&anti_node_one.in_map(max_x, max_y) && !&anti_node_two.in_map(max_x, max_y) {
+                break;
+            }
+
+            if anti_node_one.in_map(max_x, max_y) {
+                res.push(anti_node_one);
+            }
+
+            if anti_node_two.in_map(max_x, max_y) {
+                res.push(anti_node_two);
+            }
+
+            new_dx += dx;
+            new_dy += dy;
+        }
+        res
     }
 }
 
@@ -73,7 +112,7 @@ fn part_one(input: &str) -> i64 {
                 .skip(i + 1)
                 .filter_map(move |antenna2| {
                     if antenna1.value == antenna2.value {
-                        Some(antenna1.get_antinodes(
+                        Some(antenna1.get_anti_nodes(
                             antenna2,
                             grid.cols_len as i64,
                             grid.rows_len as i64,
@@ -83,14 +122,38 @@ fn part_one(input: &str) -> i64 {
                     }
                 })
         })
-        .flat_map(|(antinode_one, antinode_two)| [antinode_one, antinode_two])
+        .flat_map(|(anti_node_one, anti_node_two)| [anti_node_one, anti_node_two])
         .flatten()
         .collect::<HashSet<_>>()
         .len() as i64
 }
 
 fn part_two(input: &str) -> i64 {
-    todo!()
+    let grid = parse_input(input);
+
+    grid.antennas
+        .iter()
+        .enumerate()
+        .flat_map(|(i, antenna1)| {
+            grid.antennas
+                .iter()
+                .skip(i + 1)
+                .filter_map(move |antenna2| {
+                    if antenna1.value == antenna2.value {
+                        Some(antenna1.get_anti_nodes_continuous(
+                            antenna2,
+                            grid.cols_len as i64,
+                            grid.rows_len as i64,
+                        ))
+                    } else {
+                        None
+                    }
+                })
+        })
+        .flat_map(|anti_nodes| [anti_nodes])
+        .flatten()
+        .collect::<HashSet<_>>()
+        .len() as i64
 }
 
 fn parse_input(input: &str) -> AntennaGrid {
@@ -126,7 +189,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_antinode_locator() {
+    fn test_anti_node_locator() {
         let antenna_one = Antenna {
             value: 'A',
             x: 4,
@@ -144,8 +207,8 @@ mod tests {
         };
 
         assert_eq!(
-            antenna_one.get_antinodes(&antenna_two, grid.cols_len as i64, grid.rows_len as i64),
-            (Some(Antinode { x: 3, y: 1 }), Some(Antinode { x: 6, y: 7 }))
+            antenna_one.get_anti_nodes(&antenna_two, grid.cols_len as i64, grid.rows_len as i64),
+            (Some(AntiNode { x: 3, y: 1 }), Some(AntiNode { x: 6, y: 7 }))
         );
     }
 
@@ -205,8 +268,23 @@ mod tests {
     }
 
     #[test]
+    fn test_part_two_example_simple() {
+        let input = r#"T.........
+...T......
+.T........
+..........
+..........
+..........
+..........
+..........
+..........
+.........."#;
+        assert_eq!(part_two(input), 9);
+    }
+
+    #[test]
     fn test_part_two() {
         let input = include_str!("../input/input.txt");
-        assert_eq!(part_two(input), 0);
+        assert_eq!(part_two(input), 1034);
     }
 }
